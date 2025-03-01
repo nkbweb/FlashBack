@@ -1,0 +1,72 @@
+<!-- templates/search.html -->
+{% extends "layout.html" %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-6 offset-lg-3">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2>Search Users</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('search') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="input-group">
+                        {{ form.search(class="form-control", placeholder="Search by username...") }}
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h3>Results</h3>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for user in results %}
+                        <li class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                <img class="rounded-circle profile-img-sm me-3" src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}">
+                                <div>
+                                    <a href="{{ url_for('user_profile', username=user.username) }}" class="text-decoration-none">
+                                        <h5 class="mb-0">{{ user.username }}</h5>
+                                    </a>
+                                    <small class="text-muted">{{ user.photos|length }} posts</small>
+                                </div>
+                                <div class="ms-auto">
+                                    {% if current_user.is_authenticated and user != current_user %}
+                                        {% if current_user.is_following(user) %}
+                                            <form action="{{ url_for('unfollow', user_id=user.id) }}" method="post">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Unfollow</button>
+                                            </form>
+                                        {% else %}
+                                            <form action="{{ url_for('follow', user_id=user.id) }}" method="post">
+                                                <button type="submit" class="btn btn-sm btn-primary">Follow</button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% elif request.method == 'POST' or request.args.get('search') %}
+    <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+            <div class="alert alert-info text-center">
+                No users found matching your search criteria.
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock content %}

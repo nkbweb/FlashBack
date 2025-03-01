@@ -1,0 +1,62 @@
+
+<!-- templates/create_photo.html -->
+{% extends "layout.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h2>Share a Photo</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.picture.label(class="form-label") }}
+                        {{ form.picture(class="form-control", accept=".jpg,.jpeg,.png") }}
+                        {% if form.picture.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.picture.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.caption.label(class="form-label") }}
+                        {{ form.caption(class="form-control", rows=3) }}
+                    </div>
+                    <div class="mb-3">
+                        <div id="image-preview-container" class="d-none mb-3">
+                            <p>Preview:</p>
+                            <img id="image-preview" class="img-fluid rounded" style="max-height: 300px;">
+                        </div>
+                    </div>
+                    <div class="mb-3 text-center">
+                        {{ form.submit(class="btn btn-primary w-50") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Image preview functionality
+    document.querySelector('input[type="file"]').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            const previewContainer = document.getElementById('image-preview-container');
+            const preview = document.getElementById('image-preview');
+            
+            reader.addEventListener('load', function() {
+                preview.setAttribute('src', this.result);
+                previewContainer.classList.remove('d-none');
+            });
+            
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock content %}

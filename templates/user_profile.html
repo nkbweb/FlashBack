@@ -1,0 +1,52 @@
+<!-- templates/user_profile.html -->
+{% extends "layout.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <img class="rounded-circle profile-img" src="{{ image_file }}">
+                <h2 class="card-title">{{ user.username }}</h2>
+                <p>
+                    <strong>{{ photos|length }}</strong> Posts | 
+                    <strong>{{ user.followers.count() }}</strong> Followers | 
+                    <strong>{{ user.followed.count() }}</strong> Following
+                </p>
+                {% if current_user.is_authenticated and user != current_user %}
+                    {% if is_following %}
+                        <form action="{{ url_for('unfollow', user_id=user.id) }}" method="post">
+                            <button type="submit" class="btn btn-outline-danger">Unfollow</button>
+                        </form>
+                    {% else %}
+                        <form action="{{ url_for('follow', user_id=user.id) }}" method="post">
+                            <button type="submit" class="btn btn-primary">Follow</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h3>{{ user.username }}'s Photos</h3>
+            </div>
+            <div class="card-body">
+                {% if photos %}
+                    <div class="photo-grid">
+                        {% for photo in photos %}
+                            <div class="grid-item">
+                                <a href="{{ url_for('photo', photo_id=photo.id) }}">
+                                    <img src="{{ url_for('static', filename='uploads/' + photo.image_file) }}" class="img-fluid" alt="Photo by {{ user.username }}">
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted my-4">This user hasn't posted any photos yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

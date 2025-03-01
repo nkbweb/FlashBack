@@ -1,0 +1,123 @@
+<!-- templates/profile.html -->
+{% extends "layout.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <img class="rounded-circle profile-img" src="{{ image_file }}">
+                <h2 class="card-title">{{ current_user.username }}</h2>
+                <p style="color:#7aa5de;">{{ current_user.email }}</p>
+                <p>
+                    <strong>{{ photos|length }}</strong> Posts | 
+                    <strong>{{ current_user.followers.count() }}</strong> Followers | 
+                    <strong>{{ current_user.followed.count() }}</strong> Following
+                </p>
+                <div class="profile-completion mb-3">
+                    {% set completion = [0] %}
+                    {% if current_user.username %}{% set _ = completion.append(20) %}{% endif %}
+                    {% if current_user.email %}{% set _ = completion.append(20) %}{% endif %}
+                    {% if current_user.image_file != 'default.jpg' %}{% set _ = completion.append(20) %}{% endif %}
+                    {% if photos|length > 0 %}{% set _ = completion.append(20) %}{% endif %}
+                    {% if current_user.followed.count() > 0 %}{% set _ = completion.append(20) %}{% endif %}
+                    {% set total = completion|sum %}
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ total }}%;" 
+                             aria-valuenow="{{ total }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small class="text-muted">Profile {{ total }}% complete</small>
+                </div>
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updateProfileModal">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h3>Your Photos</h3>
+            </div>
+            <div class="card-body">
+                {% if photos %}
+                    <div class="photo-grid">
+                        {% for photo in photos %}
+                            <div class="grid-item">
+                                <a href="{{ url_for('photo', photo_id=photo.id) }}">
+                                    <img src="{{ url_for('static', filename='uploads/' + photo.image_file) }}" class="img-fluid" alt="Photo by {{ current_user.username }}">
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center my-4">
+                        <p class="text-muted">You haven't posted any photos yet.</p>
+                        <a href="{{ url_for('new_photo') }}" class="btn btn-primary">
+                            <i class="fas fa-plus-square"></i> Upload your first photo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Profile Modal -->
+<div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateProfileModalLabel">Update Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {% if form.username.errors %}
+                            {{ form.username(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.username(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {% if form.email.errors %}
+                            {{ form.email(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.email(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.picture.label(class="form-label") }}
+                        {{ form.picture(class="form-control") }}
+                        {% if form.picture.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.picture.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+

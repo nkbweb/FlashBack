@@ -1,0 +1,79 @@
+<!-- templates/home.html -->
+{% extends "layout.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        {% if current_user.is_authenticated %}
+            <div class="mb-4">
+                <a href="{{ url_for('new_photo') }}" class="btn btn-primary">
+                    <i class="fas fa-plus-square"></i> Share a Photo
+                </a>
+            </div>
+        {% endif %}
+        
+        {% if photos %}
+            {% for photo in photos %}
+                <div class="card mb-4 photo-card">
+                    <div class="card-header d-flex align-items-center">
+                        <a href="{{ url_for('user_profile', username=photo.author.username) }}" class="text-decoration-none text-dark">
+                            <img class="rounded-circle profile-img-sm me-2" src="{{ url_for('static', filename='profile_pics/' + photo.author.image_file) }}">
+                            <strong style="color: #007ACC;">{{ photo.author.username }}</strong>
+                        </a>
+                    </div>
+                    <a href="{{ url_for('photo', photo_id=photo.id) }}">
+                        <img src="{{ url_for('static', filename='uploads/' + photo.image_file) }}" class="card-img-top photo-card-img" alt="Photo by {{ photo.author.username }}">
+                    </a>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>
+                                {% if current_user.is_authenticated %}
+                                    <form action="{{ url_for('like_photo', photo_id=photo.id) }}" method="post" class="d-inline">
+                                        <button type="submit" class="like-button">
+                                            {% if current_user.is_authenticated and photo.likes|selectattr('user_id', 'equalto', current_user.id)|list %}
+                                                <i class="fas fa-heart"></i>
+                                            {% else %}
+                                                <i class="far fa-heart"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <i class="far fa-heart"></i>
+                                {% endif %}
+                                <span class="like-count">{{ photo.likes|length }} likes</span>
+                            </div>
+                            <small class="text-muted">{{ photo.date_posted.strftime('%Y-%m-%d') }}</small>
+                        </div>
+                        {% if photo.caption %}
+                            <p class="card-text">
+                                <a href="{{ url_for('user_profile', username=photo.author.username) }}" class="text-decoration-none text-dark">
+                                    <strong style="color: #007ACC;">{{ photo.author.username }}</strong>
+                                </a> 
+                                {{ photo.caption }}
+                            </p>
+                        {% endif %}
+                        <a href="{{ url_for('photo', photo_id=photo.id) }}" class="text-muted">
+                            {% if photo.comments|length > 0 %}
+                                View all {{ photo.comments|length }} comments
+                            {% else %}<p style="color:#7aa5de;">Add a comment</p>
+                                
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center my-5">
+                <p class="lead text-muted">No photos to display.</p>
+                {% if current_user.is_authenticated %}
+                    <p>Follow users to see their photos in your feed.</p>
+                    <a href="{{ url_for('explore') }}" class="btn btn-outline-primary">Explore Photos</a>
+                {% else %}
+                    <p>Sign up to share your photos and see content from other users.</p>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary me-2">Sign Up</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary">Login</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
