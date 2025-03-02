@@ -20,7 +20,19 @@ from flask_mail import Mail, Message
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(16))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///photoshare.db'
+
+# Check if the app is running in production or development
+if os.environ.get('ENVIRONMENT') == 'production':
+    # Use external URL for production
+    db_url = 'postgresql://flashback_user:6RYKNczak5ZVdDzaxEAbX3udx5qQf9iD@dpg-cv251oaj1k6c73997lh0-a.oregon-postgres.render.com/flashback'
+else:
+    # Use internal URL for development or local environment
+    db_url = 'postgresql://flashback_user:6RYKNczak5ZVdDzaxEAbX3udx5qQf9iD@dpg-cv251oaj1k6c73997lh0-a/flashback'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['PROFILE_PICS'] = 'static/profile_pics'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['PROFILE_PICS'] = 'static/profile_pics'
